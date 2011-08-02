@@ -1,7 +1,7 @@
-Passant is a chess game written in Python with support for gnuchess.
+Passant is a chess game written in Python with support for Gnuchess.
 
 WEB SITE:
-        https://github.com/xerxes2/panucci
+        https://github.com/xerxes2/passant
 
 GIT:
         git://github.com/xerxes2/passant.git
@@ -25,7 +25,7 @@ INSTALL:
 
 CONTRIBUTE:
         1. $ git clone git://github.com/xerxes2/passant.git
-        2. $ cd panucci
+        2. $ cd passant
         3. Make your changes.
         4. $ git diff HEAD > passant.patch
         5. Send the patch with personal information "fname lname <name@example.com>".
