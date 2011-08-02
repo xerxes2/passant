@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=Passant
+GenericName=Passant - Chess game written in Python
+Comment=Chess game
+Exec=passant
+Icon=/usr/share/pixmaps/passant.svg
+Terminal=false
+Type=Application
+Categories=Game;BoardGame;
+MimeType=application/x-chess-pgn;
