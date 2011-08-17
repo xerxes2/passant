@@ -174,6 +174,7 @@ Item {
                 font.pixelSize: font_size
 
                 Keys.onPressed: { if (event.key == Qt.Key_Return) {
+                                      black_player_input.closeSoftwareInputPanel()
                                       white_player_input.focus = false
                                       black_player_input.focus = false
                                   }

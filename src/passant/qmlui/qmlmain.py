@@ -159,7 +159,6 @@ class PassantGUI(QtCore.QObject):
             _move = _line.split(":")[-1].strip(" \n")
             self.on_engine_move.emit(_move)
 
-    @QtCore.Slot()
     def make_engine_move(self, _move):
         if self.engine_player:
             if len(_move) == 5:

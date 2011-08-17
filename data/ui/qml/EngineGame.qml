@@ -146,6 +146,7 @@ Item {
                 font.pixelSize: font_size
 
                 Keys.onPressed: { if (event.key == Qt.Key_Return) {
+                                      name_input.closeSoftwareInputPanel()
                                       name_input.focus = false
                                   }
                 }
