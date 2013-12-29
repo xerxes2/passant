@@ -6,6 +6,7 @@ from optparse import OptionParser
 
 parser = OptionParser()
 parser.add_option("--qml", action="store_true")
+parser.add_option("--qml2", action="store_true")
 opts, args = parser.parse_args()
 
 local_module_dir = os.path.join(os.path.dirname(sys.argv[0]), '..', 'src')
@@ -21,6 +22,8 @@ platform.detect()
 
 if opts.qml:
     from passant.qmlui.qmlmain import PassantGUI
+if opts.qml2:
+    from passant.qml2ui.qml2main import PassantGUI
 else:
     from passant.qmlui.qmlmain import PassantGUI
 

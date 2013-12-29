@@ -1,2 +1,4 @@
 include README COPYING MANIFEST.in setup.py
 recursive-include data *
+prune data/ui/qml/pieces
+prune data/ui/qml2/pieces

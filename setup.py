@@ -14,10 +14,10 @@ PACKAGES = [d2p(d) for d, dd, ff in os.walk(SRC_DIR) if '__init__.py' in ff]
 SCRIPTS = glob.glob('bin/*')
 
 DATA_FILES = [
-    ('share/passant', glob.glob('icons/*.png')),
     ('share/passant/qml', glob.glob('data/ui/qml/*.qml')),
-    ('share/passant/qml/pieces/white', glob.glob('data/ui/qml/pieces/white/*.svg')),
-    ('share/passant/qml/pieces/black', glob.glob('data/ui/qml/pieces/black/*.svg')),
+    ('share/passant/qml2', glob.glob('data/ui/qml2/*.qml')),
+    ('share/passant/pieces/white', glob.glob('data/pieces/white/*.svg')),
+    ('share/passant/pieces/black', glob.glob('data/pieces/black/*.svg')),
     ('share/applications', ['data/passant.desktop']),
     ('share/pixmaps', ['data/passant.svg']),
 ]
@@ -37,3 +37,18 @@ setup(
         scripts=SCRIPTS,
         data_files=DATA_FILES,
 )
+
+if "install" in sys.argv:
+    _prefix = "/usr"
+    _rootdir = "/"
+    for i in sys.argv:
+        if i.startswith("--prefix"):
+            _prefix = i[9:]
+        elif i.startswith("--root"):
+            _rootdir = i[7:]
+    if os.path.exists(_rootdir +  _prefix + "/share/passant/qml/pieces"):
+        os.remove(_rootdir + _prefix + "/share/passant/qml/pieces")
+    os.symlink("../pieces", _rootdir + _prefix + "/share/passant/qml/pieces")
+    if os.path.exists(_rootdir +  _prefix + "/share/passant/qml2/pieces"):
+        os.remove(_rootdir + _prefix + "/share/passant/qml2/pieces")
+    os.symlink("../pieces", _rootdir + _prefix + "/share/passant/qml2/pieces")

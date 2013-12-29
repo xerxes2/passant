@@ -5,9 +5,11 @@ import os
 import logging
 import ConfigParser
 
-from PySide import QtCore
-from PySide import QtGui
-from PySide import QtDeclarative
+from PyQt5 import QtCore
+from PyQt5 import QtGui
+from PyQt5 import QtWidgets
+from PyQt5 import QtQml
+from PyQt5 import QtQuick
 
 from passant import platform
 from passant import util
@@ -18,10 +20,12 @@ from passant.engines import engine_cecp
 class PassantGUI(QtCore.QObject):
     def __init__(self):
         QtCore.QObject.__init__(self)
-        self.app = QtGui.QApplication(["Passant"])
-        self.app.setWindowIcon(QtGui.QIcon(''))
+        self.app = QtWidgets.QApplication(["Passant"])
+        #self.app.setWindowIcon(QtGui.QIcon(''))
         self.validator = validator.MoveValidator()
-        self.view = QtDeclarative.QDeclarativeView()
+        self.view = QtQuick.QQuickView()
+        self.view.setResizeMode(QtQuick.QQuickView.SizeRootObjectToView)
+        self.view.setDefaultAlphaBuffer(True)
         self.view.closeEvent = self.close_main_window_callback
         self.context = self.view.rootContext()
         self.context.setContextProperty('main', self)
@@ -32,7 +36,6 @@ class PassantGUI(QtCore.QObject):
         self.game_info = {"event": "", "site": "", "date": "", "round": "", "white": "", "black": "", "result": ""}
         self.pause = False
         self.create_actions()
-        self.view.setResizeMode(QtDeclarative.QDeclarativeView.SizeRootObjectToView)
 
         self.timer_white = QtCore.QTimer()
         self.timer_white.setInterval(500)
@@ -46,23 +49,22 @@ class PassantGUI(QtCore.QObject):
         self.engine = engine_cecp.EngineCECP(self.engine_callback)
         self.on_engine_move.connect(self.make_engine_move)
         
-        self.view.setAttribute(QtCore.Qt.WA_LockLandscapeOrientation)
-        if platform.HARMATTAN:
-            self.view.setSource(util.find_data_file("qml/main_harmattan.qml"))
+        if platform.SAILFISH:
+            self.view.setSource(QtCore.QUrl(util.find_data_file("qml2/main_sailfish.qml")))
             self.view.showFullScreen()
         else:
-            self.view.setSource(util.find_data_file("qml/main_default.qml"))
+            self.view.setSource(QtCore.QUrl(util.find_data_file("qml2/main_default.qml")))
             self.view.show()
         self.app.exec_()
 
     def create_actions(self):
-        self.action_new_manual_game = QtGui.QAction(QtGui.QIcon(''), "New Manual Game".decode("utf-8"), self.view,
+        self.action_new_manual_game = QtWidgets.QAction(QtGui.QIcon(''), "New Manual Game".decode("utf-8"), self.view,
             triggered=self.new_manual_game_callback)
         self.context.setContextProperty('action_new_manual_game', self.action_new_manual_game)
-        self.action_new_engine_game = QtGui.QAction(QtGui.QIcon(''), "New Engine Game".decode("utf-8"), self.view,
+        self.action_new_engine_game = QtWidgets.QAction(QtGui.QIcon(''), "New Engine Game".decode("utf-8"), self.view,
             triggered=self.new_engine_game_callback)
         self.context.setContextProperty('action_new_engine_game', self.action_new_engine_game)
-        self.action_quit = QtGui.QAction(QtGui.QIcon(''), "Quit".decode("utf-8"), self.view,
+        self.action_quit = QtWidgets.QAction(QtGui.QIcon(''), "Quit".decode("utf-8"), self.view,
             triggered=self.quit_app)
         self.context.setContextProperty('action_quit', self.action_quit)
         # Queening
@@ -99,7 +101,7 @@ class PassantGUI(QtCore.QObject):
         self.context.setContextProperty('name_str', self.name_str)
 
     def quit_app(self):
-        self.view.hide()
+        self.view.close()
         self.engine.quit_engine()
         self.app.exit()
 
@@ -107,7 +109,7 @@ class PassantGUI(QtCore.QObject):
         self.quit_app()
 
     def show_main_window(self):
-        self.view.activateWindow()
+        self.view.requestActivate()
 
     def new_manual_game_callback(self):
         self.view.rootObject().property("root").openManualGame()
@@ -119,7 +121,7 @@ class PassantGUI(QtCore.QObject):
         else:
             self.view.rootObject().property("root").openEngineGame()
 
-    @QtCore.Slot(str)
+    @QtCore.pyqtSlot(str)
     def start_new_manual_game(self, _time):
         self.engine.quit_engine()
         self.engine_player = ""
@@ -137,7 +139,7 @@ class PassantGUI(QtCore.QObject):
             self.view.rootObject().property("root").setTime("b", util.convert_ns(self.time_black))
             self.timer_white.start()
 
-    @QtCore.Slot(str, str)
+    @QtCore.pyqtSlot(str, str)
     def start_new_engine_game(self, _player, _time):
         self.engine.quit_engine()
         self.reset_time()
@@ -186,7 +188,7 @@ class PassantGUI(QtCore.QObject):
         self.view.rootObject().property("root").setTime("w", "00:00")
         self.view.rootObject().property("root").setTime("b", "00:00")
 
-    @QtCore.Slot()
+    @QtCore.pyqtSlot()
     def save_game(self):
         format_pgn.save_format("passant.pgn", self.validator.moves, self.validator.boards, self.game_info)
 
@@ -220,7 +222,7 @@ class PassantGUI(QtCore.QObject):
                 self.pause = False
                 self.on_pause.emit()
 
-    @QtCore.Slot(bool)
+    @QtCore.pyqtSlot(bool)
     def start_stop_timer(self, _start):
         if self.time_white:
             if _start:
@@ -235,7 +237,7 @@ class PassantGUI(QtCore.QObject):
                 self.pause = True
             self.on_pause.emit()
 
-    @QtCore.Slot(str)
+    @QtCore.pyqtSlot(str)
     def validate_move(self, _move):
         if self.validator.validate_move(_move):
             self.valid_move = True
@@ -254,7 +256,7 @@ class PassantGUI(QtCore.QObject):
         else:
             self.valid_move = False
 
-    @QtCore.Slot(str)
+    @QtCore.pyqtSlot(str)
     def queening(self, _piece):
         self.validator.add_queening(_piece)
         self.view.rootObject().property("root").addPiece(self.validator.queening_square, self.current_player + _piece)
@@ -271,7 +273,7 @@ class PassantGUI(QtCore.QObject):
         else:
             self.current_player = "w"
 
-    @QtCore.Slot(str)
+    @QtCore.pyqtSlot(str)
     def validate_square(self, _square):
         if self.validator.get_valid_square(_square):
             self.active_square = _square
@@ -280,7 +282,7 @@ class PassantGUI(QtCore.QObject):
     def get_active_square(self):
         return self.active_square
 
-    @QtCore.Slot(str)
+    @QtCore.pyqtSlot(str)
     def set_active_square(self, _square):
         self.active_square = _square
         self.on_square.emit()
@@ -300,14 +302,14 @@ class PassantGUI(QtCore.QObject):
     def get_pause(self):
         return self.pause
 
-    on_move = QtCore.Signal()
-    on_engine_move = QtCore.Signal(str)
-    valid_move_bool = QtCore.Property(bool, get_valid_move, notify=on_move)
-    check_bool = QtCore.Property(bool, get_check, notify=on_move)
-    check_mate_bool = QtCore.Property(bool, get_check_mate, notify=on_move)
-    current_player_str = QtCore.Property(str, get_current_player, notify=on_move)
-    engine_move_str = QtCore.Property(str, make_engine_move, notify=on_move)
-    on_square = QtCore.Signal()
-    active_square_name = QtCore.Property(str, get_active_square, notify=on_square)
-    on_pause = QtCore.Signal()
-    pause_bool = QtCore.Property(bool, get_pause, notify=on_pause)
+    on_move = QtCore.pyqtSignal()
+    on_engine_move = QtCore.pyqtSignal(str)
+    valid_move_bool = QtCore.pyqtProperty(bool, get_valid_move, notify=on_move)
+    check_bool = QtCore.pyqtProperty(bool, get_check, notify=on_move)
+    check_mate_bool = QtCore.pyqtProperty(bool, get_check_mate, notify=on_move)
+    current_player_str = QtCore.pyqtProperty(str, get_current_player, notify=on_move)
+    engine_move_str = QtCore.pyqtProperty(str, make_engine_move, notify=on_move)
+    on_square = QtCore.pyqtSignal()
+    active_square_name = QtCore.pyqtProperty(str, get_active_square, notify=on_square)
+    on_pause = QtCore.pyqtSignal()
+    pause_bool = QtCore.pyqtProperty(bool, get_pause, notify=on_pause)
